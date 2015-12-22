@@ -23,28 +23,30 @@ import java.util.Calendar;
 public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    private ContentResolver cr;
+    private MyQueryHandler queryHandler;
+
     private ListView listView;
     private Button insert_button;
     private Button delete_button;
     private EventAdapter adapter;
-    private ContentResolver cr;
     private long calID;
-    private MyQueryHandler queryHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        listView = (ListView)findViewById(R.id.list);
-        insert_button = (Button)findViewById(R.id.insert_button);
-        delete_button = (Button)findViewById(R.id.delete_button);
-        adapter = new EventAdapter(this,null,0);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(adapter);
         cr = getContentResolver();
         queryHandler = new MyQueryHandler(cr);
 
+        listView = (ListView)findViewById(R.id.list);
+        adapter = new EventAdapter(this);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(adapter);
+
+        insert_button = (Button)findViewById(R.id.insert_button);
         insert_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        delete_button = (Button)findViewById(R.id.delete_button);
         delete_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

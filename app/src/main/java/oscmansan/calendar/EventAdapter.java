@@ -1,5 +1,6 @@
 package oscmansan.calendar;
 
+import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -18,11 +19,14 @@ import android.widget.TextView;
 public class EventAdapter extends CursorAdapter implements AdapterView.OnItemClickListener {
 
     private static final String LOG_TAG = EventAdapter.class.getSimpleName();
-    private Context context;
 
-    public EventAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
-        this.context = context;
+    private ContentResolver cr;
+    private MyQueryHandler queryHandler;
+
+    public EventAdapter(Context context) {
+        super(context, null, 0);
+        cr = context.getContentResolver();
+        queryHandler = new MyQueryHandler(cr);
     }
 
     @Override
@@ -34,6 +38,10 @@ public class EventAdapter extends CursorAdapter implements AdapterView.OnItemCli
     public void bindView(View view, Context context, Cursor cursor) {
         ((TextView)view.findViewById(R.id.event_id)).setText(String.valueOf(cursor.getLong(0)));
         ((TextView)view.findViewById(R.id.event_name)).setText(cursor.getString(1));
+        int status = cursor.getInt(2);
+        if (status == Events.STATUS_CONFIRMED) {
+            view.setBackgroundColor(0xFFBDBDBD);
+        }
     }
 
     @Override
@@ -42,23 +50,32 @@ public class EventAdapter extends CursorAdapter implements AdapterView.OnItemCli
 
         long eventID = cursor.getLong(0);
         int status = cursor.getInt(2);
-        Log.d(LOG_TAG, "status: " + status);
-
-        ContentResolver cr = context.getContentResolver();
         ContentValues values = new ContentValues();
 
         // The new status for the event
         if (status == Events.STATUS_TENTATIVE) {
             values.put(Events.STATUS, Events.STATUS_CONFIRMED);
-            view.setBackgroundColor(context.getResources().getColor(android.R.color.tab_indicator_text));
-        }
-        else {
+            view.setBackgroundColor(0xFFBDBDBD);
+        } else {
             values.put(Events.STATUS, Events.STATUS_TENTATIVE);
-            view.setBackgroundColor(context.getResources().getColor(android.R.color.background_light));
+            view.setBackgroundColor(0x00000000);
         }
 
         Uri updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
-        int rows = cr.update(updateUri, values, null, null);
-        Log.d(LOG_TAG, "Rows updated: " + rows);
+        queryHandler.startUpdate(1, cursor,updateUri, values, null, null);
+    }
+
+    private class MyQueryHandler extends AsyncQueryHandler {
+
+        public MyQueryHandler(ContentResolver cr) {
+            super(cr);
+        }
+
+        @Override
+        protected void onUpdateComplete(int token, Object cookie, int result) {
+            Log.d(LOG_TAG, "Rows updated: " + result);
+            Cursor cursor = (Cursor)cookie;
+            cursor.requery();
+        }
     }
 }
