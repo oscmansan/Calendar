@@ -1,6 +1,8 @@
 package oscmansan.calendar;
 
+import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
@@ -12,28 +14,61 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-    TextView textView;
-    ContentResolver cr;
+    private ListView listView;
+    private Button insert_button;
+    private Button delete_button;
+    private EventAdapter adapter;
+    private ContentResolver cr;
+    private long calID;
+    private MyQueryHandler queryHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView = (TextView)findViewById(R.id.text);
+        listView = (ListView)findViewById(R.id.list);
+        insert_button = (Button)findViewById(R.id.insert_button);
+        delete_button = (Button)findViewById(R.id.delete_button);
+        adapter = new EventAdapter(this,null,0);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(adapter);
         cr = getContentResolver();
+        queryHandler = new MyQueryHandler(cr);
+
+        insert_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                insertEvent();
+            }
+        });
+
+        delete_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteAllEvents();
+            }
+        });
 
         if (getCalendarID() == -1)
             insertCalendar();
+        calID = getCalendarID();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         showCalendars();
-        insertEvent();
         showEvents();
     }
 
@@ -87,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
             String ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
 
             // Do something with the values...
-            String line = calID + " \t" + displayName + " \t" + accountName + " \t" + ownerName + "\n\n";
-            textView.append(line);
+            Log.d(LOG_TAG, calID + " \t" + displayName + " \t" + accountName + " \t" + ownerName + "\n\n");
         }
         cur.close();
     }
@@ -112,7 +146,13 @@ public class MainActivity extends AppCompatActivity {
 
         Uri uri = cr.insert(builder.build(),values);
         long calendarID = Long.parseLong(uri.getLastPathSegment());
-        Log.d(LOG_TAG, "Calendar inserted = " + calendarID);
+        Log.d(LOG_TAG, "Calendar inserted: " + calendarID);
+    }
+
+    private void deleteCalendar() {
+        Uri deleteUri = ContentUris.withAppendedId(Calendars.CONTENT_URI, calID);
+        int rows = getContentResolver().delete(deleteUri, null, null);
+        Log.d(LOG_TAG, "Rows deleted: " + rows);
     }
 
     private long getCalendarID() {
@@ -134,47 +174,73 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showEvents() {
-        long calID = getCalendarID();
+        String[] projection = {Events._ID, Events.TITLE, Events.STATUS};
+        String selection = "(" + Events.CALENDAR_ID + " = ?)";
+        String[] selectionArgs = {String.valueOf(calID)};
 
-        if (calID != -1) {
-            String[] projection = {Events._ID, Events.TITLE};
-            String selection = "(" + Events.CALENDAR_ID + " = ?)";
-            String[] selectionArgs = {String.valueOf(calID)};
-            Cursor cur = cr.query(Events.CONTENT_URI, projection,selection,selectionArgs,null);
-
-            while (cur.moveToNext()) {
-                Log.d(LOG_TAG, cur.getLong(0) + " " + cur.getString(1));
-            }
-            cur.close();
-        }
-        else
-            Log.d(LOG_TAG, "Calendar not found");
+        queryHandler.startQuery(1,null,Events.CONTENT_URI,projection,selection,selectionArgs,null);
     }
 
     private void insertEvent() {
-        long calID = getCalendarID();
+        Calendar beginTime = Calendar.getInstance();
+        beginTime.set(2015, 12, 25, 12, 0);
+        long startMillis = beginTime.getTimeInMillis();
+        Calendar endTime = Calendar.getInstance();
+        endTime.set(2015, 12, 25, 13, 0);
+        long endMillis = endTime.getTimeInMillis();
 
-        if (calID != -1) {
-            Calendar beginTime = Calendar.getInstance();
-            beginTime.set(2015, 12, 25, 12, 0);
-            long startMillis = beginTime.getTimeInMillis();
-            Calendar endTime = Calendar.getInstance();
-            endTime.set(2015, 12, 25, 13, 0);
-            long endMillis = endTime.getTimeInMillis();
+        ContentValues values = new ContentValues();
+        values.put(Events.DTSTART, startMillis);
+        values.put(Events.DTEND, endMillis);
+        values.put(Events.TITLE, "Test Event");
+        values.put(Events.CALENDAR_ID, calID);
+        values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
+        values.put(Events.STATUS,Events.STATUS_TENTATIVE);
 
-            ContentValues values = new ContentValues();
-            values.put(Events.DTSTART, startMillis);
-            values.put(Events.DTEND, endMillis);
-            values.put(Events.TITLE, "Test Event");
-            values.put(Events.CALENDAR_ID, calID);
-            values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
-            Uri uri = cr.insert(Events.CONTENT_URI, values);
+        queryHandler.startInsert(1, null, Events.CONTENT_URI, values);
+    }
 
+    private void deleteEvent(long eventID) {
+        Uri deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+        queryHandler.startDelete(1, null, deleteUri, null, null);
+    }
+
+    private void deleteAllEvents() {
+        String[] projection = {Events._ID};
+        String selection = "(" + Events.CALENDAR_ID + " = ?)";
+        String[] selectionArgs = {String.valueOf(calID)};
+        Cursor cur = cr.query(Events.CONTENT_URI, projection,selection,selectionArgs,null);
+
+        while (cur.moveToNext()) {
+            long eventID = cur.getLong(0);
+            deleteEvent(eventID);
+        }
+        cur.close();
+    }
+
+    private class MyQueryHandler extends AsyncQueryHandler {
+
+        public MyQueryHandler(ContentResolver cr) {
+            super(cr);
+        }
+
+        @Override
+        protected void onQueryComplete(int token, Object cookie, Cursor cur) {
+            adapter.swapCursor(cur);
+        }
+
+        @Override
+        protected void onInsertComplete(int token, Object cookie, Uri uri) {
             // get the event ID that is the last element in the Uri
             long eventID = Long.parseLong(uri.getLastPathSegment());
-            Log.d(LOG_TAG, "Event inserted = " + eventID);
+            Log.d(LOG_TAG, "Event inserted: " + eventID);
+            showEvents();
         }
-        else
-            Log.d(LOG_TAG, "Calendar not found");
+
+        @Override
+        protected void onDeleteComplete(int token, Object cookie, int result) {
+            Log.d(LOG_TAG, "Rows deleted: " + result);
+            showEvents();
+        }
     }
 }
