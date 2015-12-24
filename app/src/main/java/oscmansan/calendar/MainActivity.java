@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         }
         week.setAdapter(new DayAdapter(MainActivity.this, days));
 
-        String s = "Week " + c.get(Calendar.WEEK_OF_YEAR) + " of " + c.get(Calendar.YEAR);
+        String s = c.getDisplayName(Calendar.MONTH,Calendar.LONG, Locale.US) + " of " + c.get(Calendar.YEAR);
         title.setText(s);
     }
 
