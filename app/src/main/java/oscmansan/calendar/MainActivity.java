@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Calendar> days = new ArrayList<>();
         for (int i = 0; i < 7; ++i) {
             days.add((Calendar)c.clone());
-            c.roll(Calendar.DAY_OF_MONTH, 1);
+            c.roll(Calendar.DAY_OF_WEEK, 1);
         }
         week.setAdapter(new DayAdapter(MainActivity.this, days));
 
