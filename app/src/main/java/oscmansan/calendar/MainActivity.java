@@ -12,10 +12,13 @@ import android.provider.CalendarContract.Calendars;
 import android.provider.CalendarContract.Events;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CalendarView;
+import android.widget.DatePicker;
 import android.widget.ListView;
 
 import java.util.Calendar;
@@ -27,11 +30,14 @@ public class MainActivity extends AppCompatActivity {
     private ContentResolver cr;
     private MyQueryHandler queryHandler;
 
-    private ListView listView;
+    //private ListView listView;
+    //private EventAdapter adapter;
     private Button insert_button;
     private Button delete_button;
-    private EventAdapter adapter;
     private long calID;
+    private DatePicker datePicker;
+    private ListView week;
+    private DayAdapter dayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,16 +47,33 @@ public class MainActivity extends AppCompatActivity {
         cr = getContentResolver();
         queryHandler = new MyQueryHandler(cr);
 
-        listView = (ListView)findViewById(R.id.list);
+        /*listView = (ListView)findViewById(R.id.list);
         adapter = new EventAdapter(this);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(adapter);
+        listView.setOnItemClickListener(adapter);*/
+
+        week = (ListView)findViewById(R.id.week);
+
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
+
+        datePicker = (DatePicker)findViewById(R.id.date_picker);
+        datePicker.init(year, month, day, dateSetListener);
+
+        Calendar date = Calendar.getInstance();
+        date.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        int d = date.get(Calendar.DAY_OF_MONTH);
+        Integer[] days_of_month = {d,d+1,d+2,d+3,d+4,d+5,d+6};
+        dayAdapter = new DayAdapter(this,days_of_month);
+        week.setAdapter(dayAdapter);
 
         insert_button = (Button)findViewById(R.id.insert_button);
         insert_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertEvent();
+                //insertEvent();
             }
         });
 
@@ -58,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         delete_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteAllEvents();
+                //deleteAllEvents();
             }
         });
 
@@ -67,12 +90,29 @@ public class MainActivity extends AppCompatActivity {
         calID = getCalendarID();
     }
 
+    private DatePicker.OnDateChangedListener dateSetListener = new DatePicker.OnDateChangedListener() {
+
+        public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            Log.d(LOG_TAG, "year: " + year + "  month: " + monthOfYear + "  day: " + dayOfMonth);
+            Calendar c = Calendar.getInstance();
+            c.set(year, monthOfYear, dayOfMonth);
+
+            int day_of_week = c.get(Calendar.DAY_OF_WEEK);
+            c.roll(Calendar.DAY_OF_WEEK,-(day_of_week-Calendar.MONDAY));
+            int d = c.get(Calendar.DAY_OF_MONTH);
+            Integer[] days_of_month = {d,d+1,d+2,d+3,d+4,d+5,d+6};
+            DayAdapter dayAdapter = new DayAdapter(MainActivity.this,days_of_month);
+            dayAdapter.notifyDataSetChanged();
+            week.setAdapter(dayAdapter);
+        }
+    };
+
     @Override
     protected void onStart() {
         super.onStart();
 
-        showCalendars();
-        showEvents();
+        //showCalendars();
+        //showEvents();
     }
 
     @Override
@@ -229,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cur) {
-            adapter.swapCursor(cur);
+            //adapter.swapCursor(cur);
         }
 
         @Override
