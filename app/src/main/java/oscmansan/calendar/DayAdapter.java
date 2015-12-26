@@ -1,6 +1,9 @@
 package oscmansan.calendar;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.provider.CalendarContract;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +21,21 @@ public class DayAdapter extends ArrayAdapter<Calendar> {
 
     private Context context;
     private ArrayList<Calendar> days;
+    private long calID;
+    private LinearLayout eventList;
+    private ArrayList<Cursor> cursors;
 
-    public DayAdapter(Context context, ArrayList<Calendar> days) {
+    public DayAdapter(Context context, long calID, ArrayList<Calendar> days) {
         super(context, -1, days);
 
         this.context = context;
         this.days = days;
+        this.calID = calID;
+
+        cursors = new ArrayList<>();
+        for (int i = 0; i < days.size(); ++i) {
+            getEventsOnDay(i);
+        }
     }
 
     @Override
@@ -37,15 +49,28 @@ public class DayAdapter extends ArrayAdapter<Calendar> {
         ((TextView)view.findViewById(R.id.day_of_month)).setText(String.valueOf(day_of_month));
         ((TextView)view.findViewById(R.id.day_of_week)).setText(day_of_week);
 
-        LinearLayout eventList = (LinearLayout)view.findViewById(R.id.events);
+        eventList = (LinearLayout)view.findViewById(R.id.events);
         eventList.removeAllViews();
-        String[] events = {"Event 1", "Event 2", "Event 3"};
-        for (String s : events) {
+        Cursor cursor = cursors.get(position);
+        while (cursor.moveToNext()) {
             View event = LayoutInflater.from(context).inflate(R.layout.event, parent, false);
-            ((TextView)event.findViewById(R.id.event)).setText(s);
+            String s = String.valueOf(cursor.getLong(0)) + " " + cursor.getString(1);
+            ((TextView) event.findViewById(R.id.event)).setText(s);
             eventList.addView(event);
         }
+        cursor.moveToPosition(-1);
 
         return view;
+    }
+
+    void getEventsOnDay(int position) {
+        Calendar c = days.get(position);
+        String[] projection = {CalendarContract.Events._ID, CalendarContract.Events.TITLE, CalendarContract.Events.STATUS};
+        String selection = "((" + CalendarContract.Events.CALENDAR_ID + " = ?) AND ("
+                                + CalendarContract.Events.DTSTART + " >= ?))";
+        String[] selectionArgs = {String.valueOf(calID),String.valueOf(c.getTimeInMillis())};
+
+        Cursor cur = context.getContentResolver().query(CalendarContract.Events.CONTENT_URI,projection,selection,selectionArgs,null);
+        cursors.add(position,cur);
     }
 }

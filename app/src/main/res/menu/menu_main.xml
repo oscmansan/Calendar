@@ -11,4 +11,10 @@
         android:icon="@drawable/ic_today_white_48dp"
         app:showAsAction="ifRoom" />
 
+    <item android:id="@+id/add_event"
+        android:title="@string/add_event"
+        android:orderInCategory="20"
+        android:icon="@drawable/ic_add_box_white_48dp"
+        app:showAsAction="ifRoom" />
+
 </menu>

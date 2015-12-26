@@ -6,4 +6,6 @@
     <string name="insert_event">insert event</string>
     <string name="delete_all">delete all</string>
     <string name="pick_date">Pick date</string>
+    <string name="add_event">Add event</string>
+    <string name="title_activity_add_event">AddEventActivity</string>
 </resources>

@@ -1,7 +1,14 @@
 package oscmansan.calendar;
 
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -20,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView week;
     private TextView title;
+    private long calID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +37,17 @@ public class MainActivity extends AppCompatActivity {
         week = (ListView)findViewById(R.id.week);
         title = (TextView)findViewById(R.id.title);
 
-        Calendar c = Calendar.getInstance();
-        showWeek(c);
+        if (getCalendarID() == -1)
+            insertCalendar();
+        calID = getCalendarID();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        Calendar c = Calendar.getInstance();
+        showWeek(c);
     }
 
     @Override
@@ -57,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.pick_date:
                 pickDate();
+                return true;
+            case R.id.add_event:
+                Intent intent = new Intent(this,AddEventActivity.class);
+                intent.putExtra("calID", calID);
+                startActivity(intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -80,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             days.add((Calendar)c.clone());
             c.roll(Calendar.DAY_OF_WEEK, 1);
         }
-        week.setAdapter(new DayAdapter(MainActivity.this, days));
+        week.setAdapter(new DayAdapter(MainActivity.this, calID, days));
 
         String s = c.getDisplayName(Calendar.MONTH,Calendar.LONG, Locale.US) + " of " + c.get(Calendar.YEAR);
         title.setText(s);
@@ -95,5 +112,51 @@ public class MainActivity extends AppCompatActivity {
             showWeek(c);
         }
     };
+
+    private void insertCalendar() {
+        ContentValues values = new ContentValues();
+        values.put(CalendarContract.Calendars.ACCOUNT_NAME,"some.account@googlemail.com");
+        values.put(CalendarContract.Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL);
+        values.put(CalendarContract.Calendars.NAME,"Local Calendar");
+        values.put(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,"Local Calendar");
+        values.put(CalendarContract.Calendars.CALENDAR_COLOR,0xffff0000);
+        values.put(CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL, CalendarContract.Calendars.CAL_ACCESS_OWNER);
+        values.put(CalendarContract.Calendars.OWNER_ACCOUNT,"some.account@googlemail.com");
+        values.put(CalendarContract.Calendars.CALENDAR_TIME_ZONE,"Europe/Madrid");
+        values.put(CalendarContract.Calendars.SYNC_EVENTS, 1);
+
+        Uri.Builder builder = CalendarContract.Calendars.CONTENT_URI.buildUpon();
+        builder.appendQueryParameter(CalendarContract.Calendars.ACCOUNT_NAME,"some.account@googlemail.com");
+        builder.appendQueryParameter(CalendarContract.Calendars.ACCOUNT_TYPE,CalendarContract.ACCOUNT_TYPE_LOCAL);
+        builder.appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER,"true");
+
+        Uri uri = getContentResolver().insert(builder.build(), values);
+        long calendarID = Long.parseLong(uri.getLastPathSegment());
+        Log.d(LOG_TAG, "Calendar inserted: " + calendarID);
+    }
+
+    private void deleteCalendar() {
+        Uri deleteUri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, calID);
+        int rows = getContentResolver().delete(deleteUri, null, null);
+        Log.d(LOG_TAG, "Rows deleted: " + rows);
+    }
+
+    private long getCalendarID() {
+        String[] projection = {CalendarContract.Calendars._ID};
+        String selection = "((" + CalendarContract.Calendars.ACCOUNT_NAME + " = ?) AND ("
+                + CalendarContract.Calendars.ACCOUNT_TYPE + " = ?))";
+        String[] selectionArgs = {
+                "some.account@googlemail.com",
+                CalendarContract.ACCOUNT_TYPE_LOCAL
+        };
+        Cursor cur = getContentResolver().query(CalendarContract.Calendars.CONTENT_URI, projection, selection, selectionArgs, null);
+
+        long calID = -1;
+        if (cur.moveToNext()) {
+            calID = cur.getLong(0);
+        }
+        cur.close();
+        return calID;
+    }
 
 }
