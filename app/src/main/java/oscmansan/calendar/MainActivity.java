@@ -75,6 +75,11 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("calID", calID);
                 startActivity(intent);
                 return true;
+            case R.id.delete_all_events:
+                deleteAllEvents();
+                Calendar c = Calendar.getInstance();
+                showWeek(c);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -157,6 +162,25 @@ public class MainActivity extends AppCompatActivity {
         }
         cur.close();
         return calID;
+    }
+
+    private void deleteEvent(long eventID) {
+        Uri deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventID);
+        int rows = getContentResolver().delete(deleteUri, null, null);
+        Log.d(LOG_TAG, "Rows deleted: " + rows);
+    }
+
+    private void deleteAllEvents() {
+        String[] projection = {CalendarContract.Events._ID};
+        String selection = "(" + CalendarContract.Events.CALENDAR_ID + " = ?)";
+        String[] selectionArgs = {String.valueOf(calID)};
+        Cursor cur = getContentResolver().query(CalendarContract.Events.CONTENT_URI, projection, selection, selectionArgs, null);
+
+        while (cur.moveToNext()) {
+            long eventID = cur.getLong(0);
+            deleteEvent(eventID);
+        }
+        cur.close();
     }
 
 }

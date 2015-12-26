@@ -3,12 +3,14 @@ package oscmansan.calendar;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.CalendarContract;
+import android.provider.CalendarContract.Events;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -33,8 +35,8 @@ public class DayAdapter extends ArrayAdapter<Calendar> {
         this.calID = calID;
 
         cursors = new ArrayList<>();
-        for (int i = 0; i < days.size(); ++i) {
-            getEventsOnDay(i);
+        for (Calendar day : days) {
+            getEventsOnDay(day);
         }
     }
 
@@ -57,20 +59,36 @@ public class DayAdapter extends ArrayAdapter<Calendar> {
             String s = String.valueOf(cursor.getLong(0)) + " " + cursor.getString(1);
             ((TextView) event.findViewById(R.id.event)).setText(s);
             eventList.addView(event);
+            View space = LayoutInflater.from(context).inflate(R.layout.space, parent, false);
+            eventList.addView(space);
         }
         cursor.moveToPosition(-1);
 
         return view;
     }
 
-    void getEventsOnDay(int position) {
-        Calendar c = days.get(position);
-        String[] projection = {CalendarContract.Events._ID, CalendarContract.Events.TITLE, CalendarContract.Events.STATUS};
-        String selection = "((" + CalendarContract.Events.CALENDAR_ID + " = ?) AND ("
-                                + CalendarContract.Events.DTSTART + " >= ?))";
-        String[] selectionArgs = {String.valueOf(calID),String.valueOf(c.getTimeInMillis())};
+    void getEventsOnDay(Calendar c) {
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
 
-        Cursor cur = context.getContentResolver().query(CalendarContract.Events.CONTENT_URI,projection,selection,selectionArgs,null);
-        cursors.add(position,cur);
+        Calendar dayStart = Calendar.getInstance();
+        dayStart.set(year, month, day, 0, 0, 0);
+
+        Calendar dayEnd = Calendar.getInstance();
+        dayEnd.set(year, month, day, 23, 59, 59);
+
+        String[] projection = {Events._ID, Events.TITLE, Events.STATUS, Events.DTSTART};
+        String selection = Events.CALENDAR_ID + " = ? AND "
+                                + Events.DTSTART + " >= ? AND "
+                                + Events.DTSTART + " <= ?";
+        String[] selectionArgs = {
+                String.valueOf(calID),
+                String.valueOf(Long.toString(dayStart.getTimeInMillis())),
+                String.valueOf(Long.toString(dayEnd.getTimeInMillis()))
+        };
+
+        Cursor cur = context.getContentResolver().query(Events.CONTENT_URI,projection,selection,selectionArgs,null);
+        cursors.add(cur);
     }
 }

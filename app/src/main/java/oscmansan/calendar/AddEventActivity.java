@@ -68,10 +68,10 @@ public class AddEventActivity extends AppCompatActivity {
 
     private void insertEvent() {
         Calendar beginTime = Calendar.getInstance();
-        beginTime.set(2015, 12, 25, 12, 0);
+        beginTime.set(2015, Calendar.DECEMBER, 25, 12, 0);
         long startMillis = beginTime.getTimeInMillis();
         Calendar endTime = Calendar.getInstance();
-        endTime.set(2015, 12, 25, 13, 0);
+        endTime.set(2015, Calendar.DECEMBER, 25, 13, 0);
         long endMillis = endTime.getTimeInMillis();
 
         ContentValues values = new ContentValues();

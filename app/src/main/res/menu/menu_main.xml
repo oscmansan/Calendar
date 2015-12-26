@@ -17,4 +17,9 @@
         android:icon="@drawable/ic_add_box_white_48dp"
         app:showAsAction="ifRoom" />
 
+    <item android:id="@+id/delete_all_events"
+        android:title="@string/delete_all_events"
+        android:orderInCategory="30"
+        app:showAsAction="never" />
+
 </menu>
