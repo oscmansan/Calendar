@@ -6,7 +6,10 @@
     <string name="insert_event">insert event</string>
     <string name="delete_all">delete all</string>
     <string name="pick_date">Pick date</string>
-    <string name="add_event">Add event</string>
-    <string name="title_activity_add_event">AddEventActivity</string>
+    <string name="save">Save</string>
+    <string name="title_activity_add_event">Add event</string>
     <string name="delete_all_events">Delete all events</string>
+    <string name="add_event">Add event</string>
+    <string name="edit_event_title_hint">write titles, people and places…</string>
+    <string name="edit_event_title_label">Title</string>
 </resources>
