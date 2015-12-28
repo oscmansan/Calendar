@@ -6,7 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.CalendarContract;
+import android.provider.CalendarContract.Events;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -35,6 +35,7 @@ public class AddEventActivity extends AppCompatActivity {
     private Calendar endDate;
     private TextView edit_end_date;
     private TextView edit_end_time;
+    private EditText edit_event_description;
     private Button save_button;
     private long calID;
 
@@ -126,6 +127,17 @@ public class AddEventActivity extends AppCompatActivity {
             }
         });
 
+        edit_event_description = (EditText) findViewById(R.id.edit_event_description);
+        edit_event_description.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (v.getId() == R.id.edit_event_description && !hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        });
+
         save_button = (Button)findViewById(R.id.save_button);
         save_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,14 +224,15 @@ public class AddEventActivity extends AppCompatActivity {
         long endMillis = endDate.getTimeInMillis();
 
         ContentValues values = new ContentValues();
-        values.put(CalendarContract.Events.DTSTART, startMillis);
-        values.put(CalendarContract.Events.DTEND, endMillis);
-        values.put(CalendarContract.Events.TITLE, edit_event_title.getText().toString());
-        values.put(CalendarContract.Events.CALENDAR_ID, calID);
-        values.put(CalendarContract.Events.EVENT_TIMEZONE, "Europe/Madrid");
-        values.put(CalendarContract.Events.STATUS, CalendarContract.Events.STATUS_TENTATIVE);
+        values.put(Events.DTSTART, startMillis);
+        values.put(Events.DTEND, endMillis);
+        values.put(Events.TITLE, edit_event_title.getText().toString());
+        values.put(Events.DESCRIPTION, edit_event_description.getText().toString());
+        values.put(Events.CALENDAR_ID, calID);
+        values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
+        values.put(Events.STATUS, Events.STATUS_TENTATIVE);
 
-        Uri uri = getContentResolver().insert(CalendarContract.Events.CONTENT_URI, values);
+        Uri uri = getContentResolver().insert(Events.CONTENT_URI, values);
         // get the event ID that is the last element in the Uri
         long eventID = Long.parseLong(uri.getLastPathSegment());
         Toast.makeText(this,"Event added: " + eventID, Toast.LENGTH_SHORT).show();

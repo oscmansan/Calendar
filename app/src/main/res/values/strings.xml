@@ -12,4 +12,6 @@
     <string name="add_event">Add event</string>
     <string name="edit_event_title_hint">write titles, people and places…</string>
     <string name="edit_event_title_label">Title</string>
+    <string name="add_description">Add description</string>
+    <string name="title_activity_day">DayActivity</string>
 </resources>

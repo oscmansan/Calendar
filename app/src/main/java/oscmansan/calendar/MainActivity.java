@@ -102,14 +102,16 @@ public class MainActivity extends AppCompatActivity {
         int delta = day_of_week - Calendar.MONDAY;
         if (delta < 0) delta += 7;
         c.add(Calendar.DAY_OF_WEEK, -delta);
-        Log.d(LOG_TAG, c.toString());
         ArrayList<Calendar> days = new ArrayList<>();
         for (int i = 0; i < 7; ++i) {
             days.add((Calendar) c.clone());
             c.add(Calendar.DAY_OF_WEEK, 1);
         }
         c.add(Calendar.DAY_OF_WEEK, -7);
-        week.setAdapter(new DayAdapter(MainActivity.this, calID, days));
+
+        DayAdapter dayAdapter = new DayAdapter(MainActivity.this, calID, days);
+        week.setAdapter(dayAdapter);
+        week.setOnItemClickListener(dayAdapter);
 
         String s = c.getDisplayName(Calendar.MONTH,Calendar.LONG, Locale.US) + " of " + c.get(Calendar.YEAR);
         title.setText(s);
