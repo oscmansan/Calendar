@@ -4,8 +4,12 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Calendar;
@@ -32,6 +36,29 @@ public class DayActivity extends AppCompatActivity {
         ((TextView)findViewById(R.id.day_of_month)).setText(String.valueOf(c.get(Calendar.DAY_OF_MONTH)));
         String month_year = c.getDisplayName(Calendar.MONTH,Calendar.LONG,Locale.US) + " " + c.get(Calendar.YEAR);
         ((TextView)findViewById(R.id.month_year)).setText(month_year);
+
+        LinearLayout eventList = (LinearLayout)findViewById(R.id.events_detail);
+        eventList.removeAllViews();
+        Cursor cursor = getEventsOnDay(c);
+        while (cursor.moveToNext()) {
+            View event = LayoutInflater.from(this).inflate(R.layout.event, eventList, false);
+
+            String title = cursor.getString(1);
+            ((TextView) event.findViewById(R.id.event_title)).setText(title);
+
+            Calendar beginTime = Calendar.getInstance();
+            beginTime.setTimeInMillis(cursor.getLong(3));
+            Calendar endTime = Calendar.getInstance();
+            endTime.setTimeInMillis(cursor.getLong(4));
+            String time =
+                    String.format("%02d",beginTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                            String.format("%02d",beginTime.get(Calendar.MINUTE)) + " - " +
+                            String.format("%02d",endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                            String.format("%02d", endTime.get(Calendar.MINUTE));
+            ((TextView) event.findViewById(R.id.event_time)).setText(time);
+
+            eventList.addView(event);
+        }
     }
 
     @Override
