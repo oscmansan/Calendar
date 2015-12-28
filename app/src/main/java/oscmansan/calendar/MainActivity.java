@@ -1,7 +1,6 @@
 package oscmansan.calendar;
 
 import android.app.DatePickerDialog;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -25,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
+    Calendar c;
     private ListView week;
     private TextView title;
     private long calID;
@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        c = Calendar.getInstance();
 
         week = (ListView)findViewById(R.id.week);
         title = (TextView)findViewById(R.id.title);
@@ -45,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        Calendar c = Calendar.getInstance();
         showWeek(c);
     }
 
@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.delete_all_events:
                 deleteAllEvents();
-                Calendar c = Calendar.getInstance();
                 showWeek(c);
                 return true;
             default:
@@ -91,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void pickDate() {
-        Calendar c = Calendar.getInstance();
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
@@ -101,12 +99,16 @@ public class MainActivity extends AppCompatActivity {
 
     void showWeek(Calendar c) {
         int day_of_week = c.get(Calendar.DAY_OF_WEEK);
-        c.roll(Calendar.DAY_OF_WEEK, -(day_of_week - Calendar.MONDAY));
+        int delta = day_of_week - Calendar.MONDAY;
+        if (delta < 0) delta += 7;
+        c.add(Calendar.DAY_OF_WEEK, -delta);
+        Log.d(LOG_TAG, c.toString());
         ArrayList<Calendar> days = new ArrayList<>();
         for (int i = 0; i < 7; ++i) {
-            days.add((Calendar)c.clone());
-            c.roll(Calendar.DAY_OF_WEEK, 1);
+            days.add((Calendar) c.clone());
+            c.add(Calendar.DAY_OF_WEEK, 1);
         }
+        c.add(Calendar.DAY_OF_WEEK, -7);
         week.setAdapter(new DayAdapter(MainActivity.this, calID, days));
 
         String s = c.getDisplayName(Calendar.MONTH,Calendar.LONG, Locale.US) + " of " + c.get(Calendar.YEAR);
@@ -117,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
 
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             Log.d(LOG_TAG, "year: " + year + "  month: " + monthOfYear + "  day: " + dayOfMonth);
-            Calendar c = Calendar.getInstance();
             c.set(year, monthOfYear, dayOfMonth);
             showWeek(c);
         }

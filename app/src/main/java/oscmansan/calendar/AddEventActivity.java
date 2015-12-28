@@ -50,14 +50,16 @@ public class AddEventActivity extends AppCompatActivity {
         edit_event_title.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if(v.getId() == R.id.edit_event_title && !hasFocus) {
-                    InputMethodManager imm =  (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (v.getId() == R.id.edit_event_title && !hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
             }
         });
 
         beginDate = Calendar.getInstance();
+        beginDate.add(Calendar.HOUR_OF_DAY, 1);
+        beginDate.set(Calendar.MINUTE,0);
 
         edit_begin_date = (TextView)findViewById(R.id.edit_begin_date);
         SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
@@ -91,6 +93,8 @@ public class AddEventActivity extends AppCompatActivity {
         });
 
         endDate = Calendar.getInstance();
+        endDate.add(Calendar.HOUR_OF_DAY, 2);
+        endDate.set(Calendar.MINUTE,0);
 
         edit_end_date = (TextView)findViewById(R.id.edit_end_date);
         edit_end_date.setText(df.format(endDate.getTime()));
