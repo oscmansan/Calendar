@@ -1,5 +1,6 @@
 package oscmansan.calendar;
 
+import android.app.AlertDialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -9,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.Calendar;
@@ -39,11 +39,12 @@ public class DayActivity extends AppCompatActivity {
 
         LinearLayout eventList = (LinearLayout)findViewById(R.id.events_detail);
         eventList.removeAllViews();
-        Cursor cursor = getEventsOnDay(c);
+        final Cursor cursor = getEventsOnDay(c);
         while (cursor.moveToNext()) {
             View event = LayoutInflater.from(this).inflate(R.layout.event, eventList, false);
 
-            String title = cursor.getString(1);
+            final String title = cursor.getString(1);
+            final String description = cursor.getString(2);
             ((TextView) event.findViewById(R.id.event_title)).setText(title);
 
             Calendar beginTime = Calendar.getInstance();
@@ -56,6 +57,19 @@ public class DayActivity extends AppCompatActivity {
                             String.format("%02d",endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
                             String.format("%02d", endTime.get(Calendar.MINUTE));
             ((TextView) event.findViewById(R.id.event_time)).setText(time);
+
+            event.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
+                    builder.setTitle(title);
+                    if (description != null)
+                        builder.setMessage(description);
+                    else
+                        builder.setMessage("No description.");
+                    builder.create().show();
+                }
+            });
 
             eventList.addView(event);
         }
