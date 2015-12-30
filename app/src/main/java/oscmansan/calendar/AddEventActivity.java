@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -95,7 +97,7 @@ public class AddEventActivity extends AppCompatActivity {
 
         endDate = Calendar.getInstance();
         endDate.add(Calendar.HOUR_OF_DAY, 2);
-        endDate.set(Calendar.MINUTE,0);
+        endDate.set(Calendar.MINUTE, 0);
 
         edit_end_date = (TextView)findViewById(R.id.edit_end_date);
         edit_end_date.setText(df.format(endDate.getTime()));
@@ -162,8 +164,6 @@ public class AddEventActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.action_settings:
-                return true;
             case android.R.id.home:
                 finish();
                 return true;
@@ -223,6 +223,8 @@ public class AddEventActivity extends AppCompatActivity {
         long startMillis = beginDate.getTimeInMillis();
         long endMillis = endDate.getTimeInMillis();
 
+        Boolean daily = ((Switch)findViewById(R.id.daily_sw)).isChecked();
+
         ContentValues values = new ContentValues();
         values.put(Events.DTSTART, startMillis);
         values.put(Events.DTEND, endMillis);
@@ -231,8 +233,15 @@ public class AddEventActivity extends AppCompatActivity {
         values.put(Events.CALENDAR_ID, calID);
         values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
         values.put(Events.STATUS, Events.STATUS_TENTATIVE);
+        if (daily)
+            values.put(Events.SYNC_DATA1, "daily");
 
-        Uri uri = getContentResolver().insert(Events.CONTENT_URI, values);
+        Uri.Builder builder = Events.CONTENT_URI.buildUpon();
+        builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");
+        builder.appendQueryParameter(Events.ACCOUNT_TYPE,CalendarContract.ACCOUNT_TYPE_LOCAL);
+        builder.appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER,"true");
+
+        Uri uri = getContentResolver().insert(builder.build(), values);
         // get the event ID that is the last element in the Uri
         long eventID = Long.parseLong(uri.getLastPathSegment());
         Toast.makeText(this,"Event added: " + eventID, Toast.LENGTH_SHORT).show();

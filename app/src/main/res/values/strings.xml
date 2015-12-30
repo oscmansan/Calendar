@@ -14,4 +14,5 @@
     <string name="edit_event_title_label">Title</string>
     <string name="add_description">Add description</string>
     <string name="title_activity_day">DayActivity</string>
+    <string name="all_day">Daily</string>
 </resources>

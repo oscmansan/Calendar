@@ -99,13 +99,15 @@ public class DayAdapter extends ArrayAdapter<Calendar> implements AdapterView.On
         dayEnd.set(year, month, day, 23, 59, 59);
 
         String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.STATUS};
-        String selection = Events.CALENDAR_ID + " = ? AND "
+        String selection = "((" + Events.CALENDAR_ID + " = ? AND "
                                 + Events.DTSTART + " >= ? AND "
-                                + Events.DTSTART + " <= ?";
+                                + Events.DTSTART + " <= ? ) OR "
+                                + Events.SYNC_DATA1 + " = ?)";
         String[] selectionArgs = {
                 String.valueOf(calID),
                 String.valueOf(Long.toString(dayStart.getTimeInMillis())),
-                String.valueOf(Long.toString(dayEnd.getTimeInMillis()))
+                String.valueOf(Long.toString(dayEnd.getTimeInMillis())),
+                "daily"
         };
 
         return context.getContentResolver().query(Events.CONTENT_URI,projection,selection,selectionArgs, Events.DTSTART + " ASC");
