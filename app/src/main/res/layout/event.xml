@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="5dp"
-    android:background="@drawable/round_rectangle">
+    android:background="@drawable/event_rectangle">
 
     <TextView
         android:id="@+id/event_title"

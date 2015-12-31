@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        Intent intent;
+
         switch (id) {
             case R.id.action_settings:
                 return true;
@@ -76,7 +78,12 @@ public class MainActivity extends AppCompatActivity {
                 pickDate();
                 return true;
             case R.id.add_event:
-                Intent intent = new Intent(this,AddEventActivity.class);
+                intent = new Intent(this,AddEventActivity.class);
+                intent.putExtra("calID", calID);
+                startActivity(intent);
+                return true;
+            case R.id.add_task:
+                intent = new Intent(this,AddTaskActivity.class);
                 intent.putExtra("calID", calID);
                 startActivity(intent);
                 return true;

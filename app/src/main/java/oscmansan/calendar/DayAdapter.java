@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -64,23 +65,39 @@ public class DayAdapter extends ArrayAdapter<Calendar> implements AdapterView.On
         eventList.removeAllViews();
         Cursor cursor = cursors.get(position);
         while (cursor.moveToNext()) {
-            View event = LayoutInflater.from(context).inflate(R.layout.event, eventList, false);
+            String type = cursor.getString(5);
+            if (type.equals("event")) {
+                View event = LayoutInflater.from(context).inflate(R.layout.event, eventList, false);
 
-            String title = cursor.getString(1);
-            ((TextView) event.findViewById(R.id.event_title)).setText(title);
+                String title = cursor.getString(1);
+                ((TextView) event.findViewById(R.id.event_title)).setText(title);
 
-            Calendar beginTime = Calendar.getInstance();
-            beginTime.setTimeInMillis(cursor.getLong(3));
-            Calendar endTime = Calendar.getInstance();
-            endTime.setTimeInMillis(cursor.getLong(4));
-            String time =
-                    String.format("%02d",beginTime.get(Calendar.HOUR_OF_DAY)) + ":" +
-                    String.format("%02d",beginTime.get(Calendar.MINUTE)) + " - " +
-                    String.format("%02d",endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
-                    String.format("%02d", endTime.get(Calendar.MINUTE));
-            ((TextView) event.findViewById(R.id.event_time)).setText(time);
+                Calendar beginTime = Calendar.getInstance();
+                beginTime.setTimeInMillis(cursor.getLong(3));
+                Calendar endTime = Calendar.getInstance();
+                endTime.setTimeInMillis(cursor.getLong(4));
+                String time =
+                        String.format("%02d", beginTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                                String.format("%02d", beginTime.get(Calendar.MINUTE)) + " - " +
+                                String.format("%02d", endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                                String.format("%02d", endTime.get(Calendar.MINUTE));
+                ((TextView) event.findViewById(R.id.event_time)).setText(time);
 
-            eventList.addView(event);
+                eventList.addView(event);
+            }
+            else if (type.equals("task")) {
+                View task = LayoutInflater.from(context).inflate(R.layout.task, eventList, false);
+
+                String title = cursor.getString(1);
+                ((TextView) task.findViewById(R.id.task_title)).setText(title);
+
+                int status = cursor.getInt(6);
+                if (status == Events.STATUS_CONFIRMED) {
+                    task.findViewById(R.id.checkbox).setVisibility(View.VISIBLE);
+                }
+
+                eventList.addView(task);
+            }
         }
         cursor.moveToPosition(-1);
 
@@ -98,11 +115,11 @@ public class DayAdapter extends ArrayAdapter<Calendar> implements AdapterView.On
         Calendar dayEnd = Calendar.getInstance();
         dayEnd.set(year, month, day, 23, 59, 59);
 
-        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.STATUS};
+        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS};
         String selection = "((" + Events.CALENDAR_ID + " = ? AND "
                                 + Events.DTSTART + " >= ? AND "
                                 + Events.DTSTART + " <= ? ) OR "
-                                + Events.SYNC_DATA1 + " = ?)";
+                                + Events.SYNC_DATA2 + " = ?)";
         String[] selectionArgs = {
                 String.valueOf(calID),
                 String.valueOf(Long.toString(dayStart.getTimeInMillis())),

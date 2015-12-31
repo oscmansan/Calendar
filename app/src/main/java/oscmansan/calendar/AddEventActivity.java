@@ -223,8 +223,6 @@ public class AddEventActivity extends AppCompatActivity {
         long startMillis = beginDate.getTimeInMillis();
         long endMillis = endDate.getTimeInMillis();
 
-        Boolean daily = ((Switch)findViewById(R.id.daily_sw)).isChecked();
-
         ContentValues values = new ContentValues();
         values.put(Events.DTSTART, startMillis);
         values.put(Events.DTEND, endMillis);
@@ -232,9 +230,7 @@ public class AddEventActivity extends AppCompatActivity {
         values.put(Events.DESCRIPTION, edit_event_description.getText().toString());
         values.put(Events.CALENDAR_ID, calID);
         values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
-        values.put(Events.STATUS, Events.STATUS_TENTATIVE);
-        if (daily)
-            values.put(Events.SYNC_DATA1, "daily");
+        values.put(Events.SYNC_DATA1, "event");
 
         Uri.Builder builder = Events.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");

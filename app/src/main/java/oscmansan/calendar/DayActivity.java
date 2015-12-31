@@ -2,6 +2,7 @@ package oscmansan.calendar;
 
 import android.app.AlertDialog;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -72,55 +74,115 @@ public class DayActivity extends AppCompatActivity {
         eventList.removeAllViews();
         final Cursor cursor = getEventsOnDay(c);
         while (cursor.moveToNext()) {
-            View event = LayoutInflater.from(this).inflate(R.layout.event, eventList, false);
+            String type = cursor.getString(5);
+            if (type.equals("event")) {
+                View event = LayoutInflater.from(this).inflate(R.layout.event, eventList, false);
 
-            final long eventID = cursor.getLong(0);
-            final String title = cursor.getString(1);
-            final String description = cursor.getString(2);
-            ((TextView) event.findViewById(R.id.event_title)).setText(title);
+                final long eventID = cursor.getLong(0);
+                final String title = cursor.getString(1);
+                final String description = cursor.getString(2);
+                ((TextView) event.findViewById(R.id.event_title)).setText(title);
 
-            Calendar beginTime = Calendar.getInstance();
-            beginTime.setTimeInMillis(cursor.getLong(3));
-            Calendar endTime = Calendar.getInstance();
-            endTime.setTimeInMillis(cursor.getLong(4));
-            String time =
-                    String.format("%02d",beginTime.get(Calendar.HOUR_OF_DAY)) + ":" +
-                            String.format("%02d",beginTime.get(Calendar.MINUTE)) + " - " +
-                            String.format("%02d",endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
-                            String.format("%02d", endTime.get(Calendar.MINUTE));
-            ((TextView) event.findViewById(R.id.event_time)).setText(time);
+                Calendar beginTime = Calendar.getInstance();
+                beginTime.setTimeInMillis(cursor.getLong(3));
+                Calendar endTime = Calendar.getInstance();
+                endTime.setTimeInMillis(cursor.getLong(4));
+                String time =
+                        String.format("%02d", beginTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                                String.format("%02d", beginTime.get(Calendar.MINUTE)) + " - " +
+                                String.format("%02d", endTime.get(Calendar.HOUR_OF_DAY)) + ":" +
+                                String.format("%02d", endTime.get(Calendar.MINUTE));
+                ((TextView) event.findViewById(R.id.event_time)).setText(time);
 
-            event.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
-                    builder.setTitle(title);
-                    if (description != null)
-                        builder.setMessage(description);
-                    else
-                        builder.setMessage("No description.");
-                    builder.create().show();
+                event.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
+                        builder.setTitle(title);
+                        if (description != null)
+                            builder.setMessage(description);
+                        else
+                            builder.setMessage("No description.");
+                        builder.create().show();
+                    }
+                });
+
+                event.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
+                        builder.setItems(new String[]{"Delete event"}, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteEvent(eventID);
+                                setEvents();
+                            }
+                        });
+                        builder.create().show();
+
+                        return true;
+                    }
+                });
+
+                eventList.addView(event);
+            }
+            else if (type.equals("task")) {
+                View task = LayoutInflater.from(this).inflate(R.layout.task, eventList, false);
+
+                final long eventID = cursor.getLong(0);
+                final String title = cursor.getString(1);
+                final String description = cursor.getString(2);
+                ((TextView) task.findViewById(R.id.task_title)).setText(title);
+
+                final int status = cursor.getInt(6);
+                if (status == Events.STATUS_CONFIRMED) {
+                    task.findViewById(R.id.checkbox).setVisibility(View.VISIBLE);
                 }
-            });
 
-            event.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
-                    builder.setItems(new String[]{"Delete event"}, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            deleteEvent(eventID);
-                            setEvents();
-                        }
-                    });
-                    builder.create().show();
+                task.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
+                        builder.setTitle(title);
+                        if (description != null)
+                            builder.setMessage(description);
+                        else
+                            builder.setMessage("No description.");
+                        builder.create().show();
+                    }
+                });
 
-                    return true;
-                }
-            });
+                task.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(DayActivity.this);
+                        String[] items;
+                        if (status == Events.STATUS_TENTATIVE)
+                            items = new String[]{"Delete task", "Mark as done"};
+                        else
+                            items = new String[]{"Delete task"};
+                        builder.setItems(items, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        deleteEvent(eventID);
+                                        break;
+                                    case 1:
+                                        markAsDone(eventID);
+                                        break;
+                                }
+                                setEvents();
+                            }
+                        });
+                        builder.create().show();
 
-            eventList.addView(event);
+                        return true;
+                    }
+                });
+
+                eventList.addView(task);
+            }
         }
     }
 
@@ -135,11 +197,11 @@ public class DayActivity extends AppCompatActivity {
         Calendar dayEnd = Calendar.getInstance();
         dayEnd.set(year, month, day, 23, 59, 59);
 
-        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.STATUS};
+        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS};
         String selection = "((" + Events.CALENDAR_ID + " = ? AND "
-                + Events.DTSTART + " >= ? AND "
-                + Events.DTSTART + " <= ? ) OR "
-                + Events.SYNC_DATA1 + " = ?)";
+                                + Events.DTSTART + " >= ? AND "
+                                + Events.DTSTART + " <= ? ) OR "
+                                + Events.SYNC_DATA2 + " = ?)";
         String[] selectionArgs = {
                 String.valueOf(calID),
                 String.valueOf(Long.toString(dayStart.getTimeInMillis())),
@@ -154,5 +216,13 @@ public class DayActivity extends AppCompatActivity {
         Uri deleteUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
         int rows = getContentResolver().delete(deleteUri, null, null);
         Log.d(LOG_TAG, "Rows deleted: " + rows);
+    }
+
+    private void markAsDone(long eventID) {
+        Uri updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+        ContentValues values = new ContentValues();
+        values.put(Events.STATUS, Events.STATUS_CONFIRMED);
+        int rows = getContentResolver().update(updateUri, values, null, null);
+        Log.i(LOG_TAG, "Rows updated: " + rows);
     }
 }

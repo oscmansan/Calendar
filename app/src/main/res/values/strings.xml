@@ -15,4 +15,8 @@
     <string name="add_description">Add description</string>
     <string name="title_activity_day">DayActivity</string>
     <string name="all_day">Daily</string>
+    <string name="title_activity_add_task">Add task</string>
+    <string name="add_task">Add task</string>
+    <string name="edit_task_title_label">Title</string>
+    <string name="edit_task_title_hint">write assignments…</string>
 </resources>
