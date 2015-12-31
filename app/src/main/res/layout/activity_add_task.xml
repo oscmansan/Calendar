@@ -44,35 +44,57 @@
         android:gravity="start"
         android:inputType="textCapSentences|textMultiLine"/>
 
-    <RelativeLayout
+    <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="start">
+
+        <RadioButton
+            android:id="@+id/daily_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/daily" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/weekly"
+            android:layout_marginStart="20dp"/>
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/select_week_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="20dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        android:visibility="gone" >
 
         <TextView
+            android:text="@string/select_week"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/all_day"
-            android:layout_alignParentStart="true"
             android:textSize="18sp"
             android:textColor="@android:color/black"/>
 
-        <Switch
-            android:id="@+id/daily_sw"
+        <TextView
+            android:id="@+id/select_week"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"/>
+            android:layout_marginStart="20dp"
+            android:textSize="18sp"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <Button
         android:id="@+id/save_button"
         android:text="@string/save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:gravity="center"/>
 
 </LinearLayout>

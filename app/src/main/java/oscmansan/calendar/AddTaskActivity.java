@@ -13,8 +13,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Switch;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
@@ -25,6 +28,7 @@ public class AddTaskActivity extends AppCompatActivity {
     
     private EditText edit_task_title;
     private EditText edit_task_description;
+    private RadioButton daily_radio;
     private Button save_button;
     private long calID;
 
@@ -55,6 +59,25 @@ public class AddTaskActivity extends AppCompatActivity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                 }
+            }
+        });
+
+        Calendar c = Calendar.getInstance();
+        String s = "week " + c.get(Calendar.WEEK_OF_YEAR) + " of " + c.get(Calendar.YEAR);
+        ((TextView)findViewById(R.id.select_week)).setText(s);
+
+        daily_radio = (RadioButton)findViewById(R.id.daily_radio);
+        daily_radio.setChecked(true);
+        daily_radio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            LinearLayout select_week = (LinearLayout)findViewById(R.id.select_week_layout);
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked)
+                    select_week.setVisibility(View.VISIBLE);
+                else
+                    select_week.setVisibility(View.GONE);
             }
         });
         
@@ -91,7 +114,7 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void insertTask() {
-        Boolean daily = ((Switch)findViewById(R.id.daily_sw)).isChecked();
+        Boolean daily = daily_radio.isChecked();
 
         ContentValues values = new ContentValues();
         values.put(Events.DTSTART, 0);
@@ -102,8 +125,10 @@ public class AddTaskActivity extends AppCompatActivity {
         values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
         values.put(Events.STATUS, Events.STATUS_TENTATIVE);
         values.put(Events.SYNC_DATA1, "task");
-        //if (daily)
+        if (daily)
             values.put(Events.SYNC_DATA2, "daily");
+        else
+            values.put(Events.SYNC_DATA2, "weekly");
 
         Uri.Builder builder = Events.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");
