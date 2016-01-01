@@ -68,13 +68,11 @@ public class AddEventActivity extends AppCompatActivity {
         SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
         edit_begin_date.setText(df.format(beginDate.getTime()));
         edit_begin_date.setOnClickListener(new View.OnClickListener() {
-
-            int year = beginDate.get(Calendar.YEAR);
-            int month = beginDate.get(Calendar.MONTH);
-            int day_of_month = beginDate.get(Calendar.DAY_OF_MONTH);
-
             @Override
             public void onClick(View v) {
+                int year = beginDate.get(Calendar.YEAR);
+                int month = beginDate.get(Calendar.MONTH);
+                int day_of_month = beginDate.get(Calendar.DAY_OF_MONTH);
                 DatePickerDialog datePicker = new DatePickerDialog(AddEventActivity.this, beginDateSetListener, year, month, day_of_month);
                 datePicker.show();
             }
@@ -84,12 +82,10 @@ public class AddEventActivity extends AppCompatActivity {
         edit_begin_time.setText(String.format("%02d", beginDate.get(Calendar.HOUR_OF_DAY)) + ":" +
                 String.format("%02d", beginDate.get(Calendar.MINUTE)));
         edit_begin_time.setOnClickListener(new View.OnClickListener() {
-
-            int hour = beginDate.get(Calendar.HOUR_OF_DAY);
-            int minute = beginDate.get(Calendar.MINUTE);
-
             @Override
             public void onClick(View v) {
+                int hour = beginDate.get(Calendar.HOUR_OF_DAY);
+                int minute = beginDate.get(Calendar.MINUTE);
                 TimePickerDialog timePicker = new TimePickerDialog(AddEventActivity.this, beginTimeSetListener, hour, minute, true);
                 timePicker.show();
             }
@@ -102,13 +98,11 @@ public class AddEventActivity extends AppCompatActivity {
         edit_end_date = (TextView)findViewById(R.id.edit_end_date);
         edit_end_date.setText(df.format(endDate.getTime()));
         edit_end_date.setOnClickListener(new View.OnClickListener() {
-
-            int year = endDate.get(Calendar.YEAR);
-            int month = endDate.get(Calendar.MONTH);
-            int day_of_month = endDate.get(Calendar.DAY_OF_MONTH);
-
             @Override
             public void onClick(View v) {
+                int year = endDate.get(Calendar.YEAR);
+                int month = endDate.get(Calendar.MONTH);
+                int day_of_month = endDate.get(Calendar.DAY_OF_MONTH);
                 DatePickerDialog datePicker = new DatePickerDialog(AddEventActivity.this, endDateSetListener, year, month, day_of_month);
                 datePicker.show();
             }
@@ -118,12 +112,10 @@ public class AddEventActivity extends AppCompatActivity {
         edit_end_time.setText(String.format("%02d", endDate.get(Calendar.HOUR_OF_DAY)) + ":" +
                 String.format("%02d", endDate.get(Calendar.MINUTE)));
         edit_end_time.setOnClickListener(new View.OnClickListener() {
-
-            int hour = endDate.get(Calendar.HOUR_OF_DAY);
-            int minute = endDate.get(Calendar.MINUTE);
-
             @Override
             public void onClick(View v) {
+                int hour = endDate.get(Calendar.HOUR_OF_DAY);
+                int minute = endDate.get(Calendar.MINUTE);
                 TimePickerDialog timePicker = new TimePickerDialog(AddEventActivity.this, endTimeSetListener, hour, minute, true);
                 timePicker.show();
             }

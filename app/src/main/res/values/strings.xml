@@ -19,6 +19,6 @@
     <string name="add_task">Add task</string>
     <string name="edit_task_title_label">Title</string>
     <string name="edit_task_title_hint">write assignments…</string>
-    <string name="weekly">Weekly</string>
+    <string name="weekly">For a week</string>
     <string name="select_week">Select week</string>
 </resources>

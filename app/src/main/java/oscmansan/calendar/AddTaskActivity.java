@@ -1,5 +1,6 @@
 package oscmansan.calendar;
 
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
@@ -14,21 +15,29 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddTaskActivity extends AppCompatActivity {
     
     private static final String LOG_TAG = AddTaskActivity.class.getSimpleName();
-    
+
+    private Calendar date;
     private EditText edit_task_title;
     private EditText edit_task_description;
     private RadioButton daily_radio;
+    private TextView select_week;
     private Button save_button;
     private long calID;
 
@@ -62,15 +71,25 @@ public class AddTaskActivity extends AppCompatActivity {
             }
         });
 
-        Calendar c = Calendar.getInstance();
-        String s = "week " + c.get(Calendar.WEEK_OF_YEAR) + " of " + c.get(Calendar.YEAR);
-        ((TextView)findViewById(R.id.select_week)).setText(s);
+        date = Calendar.getInstance();
+        String s = "Week " + date.get(Calendar.WEEK_OF_MONTH) + " of " +
+                date.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " + date.get(Calendar.YEAR);
+        select_week = (TextView)findViewById(R.id.select_week);
+        select_week.setText(s);
+        select_week.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int year = date.get(Calendar.YEAR);
+                int month = date.get(Calendar.MONTH);
+                int day_of_month = date.get(Calendar.DAY_OF_MONTH);
+                DatePickerDialog datePicker = new DatePickerDialog(AddTaskActivity.this, dateSetListener, year, month, day_of_month);
+                datePicker.show();
+            }
+        });
 
         daily_radio = (RadioButton)findViewById(R.id.daily_radio);
         daily_radio.setChecked(true);
         daily_radio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-            LinearLayout select_week = (LinearLayout)findViewById(R.id.select_week_layout);
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -113,22 +132,43 @@ public class AddTaskActivity extends AppCompatActivity {
         }
     }
 
+    private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            date.set(year, monthOfYear, dayOfMonth);
+
+            String s = "Week " + date.get(Calendar.WEEK_OF_MONTH) + " of " +
+                    date.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " + date.get(Calendar.YEAR);
+            select_week.setText(s);
+        }
+    };
+
     private void insertTask() {
         Boolean daily = daily_radio.isChecked();
 
         ContentValues values = new ContentValues();
-        values.put(Events.DTSTART, 0);
-        values.put(Events.DTEND, 0);
+        if (daily) {
+            values.put(Events.DTSTART, 0);
+            values.put(Events.DTEND, 0);
+            values.put(Events.SYNC_DATA2, "daily");
+        }
+        else {
+            date.set(Calendar.HOUR_OF_DAY, 0);
+            date.set(Calendar.MINUTE, 0);
+            date.set(Calendar.SECOND, 0);
+            rollToMonday(date);
+
+            values.put(Events.DTSTART, date.getTimeInMillis());
+            values.put(Events.DTEND, date.getTimeInMillis());
+            values.put(Events.SYNC_DATA2, "weekly");
+        }
+
         values.put(Events.TITLE, edit_task_title.getText().toString());
         values.put(Events.DESCRIPTION, edit_task_description.getText().toString());
         values.put(Events.CALENDAR_ID, calID);
         values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
         values.put(Events.STATUS, Events.STATUS_TENTATIVE);
         values.put(Events.SYNC_DATA1, "task");
-        if (daily)
-            values.put(Events.SYNC_DATA2, "daily");
-        else
-            values.put(Events.SYNC_DATA2, "weekly");
 
         Uri.Builder builder = Events.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");
@@ -140,5 +180,12 @@ public class AddTaskActivity extends AppCompatActivity {
         long eventID = Long.parseLong(uri.getLastPathSegment());
         Toast.makeText(this, "Task added: " + eventID, Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private void rollToMonday(Calendar c) {
+        int day_of_week = c.get(Calendar.DAY_OF_WEEK);
+        int delta = day_of_week - Calendar.MONDAY;
+        if (delta < 0) delta += 7;
+        c.add(Calendar.DAY_OF_WEEK, -delta);
     }
 }

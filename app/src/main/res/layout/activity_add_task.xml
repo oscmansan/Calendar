@@ -65,29 +65,16 @@
 
     </RadioGroup>
 
-    <LinearLayout
-        android:id="@+id/select_week_layout"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/select_week"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_gravity="start"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="20dp"
-        android:visibility="gone" >
-
-        <TextView
-            android:text="@string/select_week"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"/>
-
-        <TextView
-            android:id="@+id/select_week"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:textSize="18sp"/>
-
-    </LinearLayout>
+        android:visibility="gone"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"/>
 
     <Button
         android:id="@+id/save_button"

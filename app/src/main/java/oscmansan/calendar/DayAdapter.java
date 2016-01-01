@@ -115,19 +115,43 @@ public class DayAdapter extends ArrayAdapter<Calendar> implements AdapterView.On
         Calendar dayEnd = Calendar.getInstance();
         dayEnd.set(year, month, day, 23, 59, 59);
 
+        Calendar weekStart = Calendar.getInstance();
+        weekStart.set(year, month, day, 0, 0, 0);
+        weekStart.set(Calendar.MILLISECOND, 0);
+        rollToMonday(weekStart);
+
+        Calendar weekEnd = (Calendar)weekStart.clone();
+        weekEnd.set(Calendar.HOUR_OF_DAY, 23);
+        weekEnd.set(Calendar.MINUTE, 59);
+        weekEnd.set(Calendar.SECOND, 59);
+        weekEnd.add(Calendar.DAY_OF_WEEK, 6);
+
         String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS};
         String selection = "((" + Events.CALENDAR_ID + " = ? AND "
                                 + Events.DTSTART + " >= ? AND "
                                 + Events.DTSTART + " <= ? ) OR "
-                                + Events.SYNC_DATA2 + " = ?)";
+                                + Events.SYNC_DATA2 + " = ? OR ("
+                                + Events.SYNC_DATA2 + " = ? AND "
+                                + Events.DTSTART + " >= ? AND "
+                                + Events.DTSTART + " <= ?))";
         String[] selectionArgs = {
                 String.valueOf(calID),
-                String.valueOf(Long.toString(dayStart.getTimeInMillis())),
-                String.valueOf(Long.toString(dayEnd.getTimeInMillis())),
-                "daily"
+                String.valueOf(dayStart.getTimeInMillis()),
+                String.valueOf(dayEnd.getTimeInMillis()),
+                "daily",
+                "weekly",
+                String.valueOf(weekStart.getTimeInMillis()),
+                String.valueOf(weekEnd.getTimeInMillis())
         };
 
         return context.getContentResolver().query(Events.CONTENT_URI,projection,selection,selectionArgs, Events.DTSTART + " ASC");
+    }
+
+    private void rollToMonday(Calendar c) {
+        int day_of_week = c.get(Calendar.DAY_OF_WEEK);
+        int delta = day_of_week - Calendar.MONDAY;
+        if (delta < 0) delta += 7;
+        c.add(Calendar.DAY_OF_WEEK, -delta);
     }
 
     @Override
