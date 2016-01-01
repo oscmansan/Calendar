@@ -3,6 +3,7 @@ package oscmansan.calendar;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -13,18 +14,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -40,6 +46,8 @@ public class AddTaskActivity extends AppCompatActivity {
     private TextView select_week;
     private Button save_button;
     private long calID;
+    private ArrayList<Event> events;
+    private long eventID = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +79,33 @@ public class AddTaskActivity extends AppCompatActivity {
             }
         });
 
-        date = Calendar.getInstance();
+        Spinner linked_event = (Spinner)findViewById(R.id.linked_event_spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new ArrayList<String>());
+        adapter.add("None");
+        events = getAllEvents();
+        for (Event e : events) {
+            adapter.add(e.TITLE);
+        }
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        linked_event.setAdapter(adapter);
+
+        linked_event.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position > 0) {
+                    eventID = events.get(position-1)._ID;
+                    Log.d(LOG_TAG, "eventID: " + eventID);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+       date = Calendar.getInstance();
         String s = "Week " + date.get(Calendar.WEEK_OF_MONTH) + " of " +
                 date.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.US) + " " + date.get(Calendar.YEAR);
         select_week = (TextView)findViewById(R.id.select_week);
@@ -143,6 +177,24 @@ public class AddTaskActivity extends AppCompatActivity {
         }
     };
 
+    ArrayList<Event> getAllEvents() {
+        String[] projection = {Events._ID, Events.TITLE};
+        String selection = Events.CALENDAR_ID + " = ? AND " + Events.SYNC_DATA1 + " = ?";
+        String[] selectionArgs = {String.valueOf(calID), "event"};
+
+        Cursor cur = getContentResolver().query(Events.CONTENT_URI,projection,selection,selectionArgs, Events.DTSTART + " ASC");
+        ArrayList<Event> events = new ArrayList<>();
+        while (cur.moveToNext()) {
+            Event event = new Event();
+            event._ID = cur.getLong(0);
+            event.TITLE = cur.getString(1);
+            events.add(event);
+        }
+        cur.close();
+
+        return events;
+    }
+
     private void insertTask() {
         Boolean daily = daily_radio.isChecked();
 
@@ -169,6 +221,8 @@ public class AddTaskActivity extends AppCompatActivity {
         values.put(Events.EVENT_TIMEZONE, "Europe/Madrid");
         values.put(Events.STATUS, Events.STATUS_TENTATIVE);
         values.put(Events.SYNC_DATA1, "task");
+        if (eventID >= 0)
+            values.put(Events.SYNC_DATA3, eventID);
 
         Uri.Builder builder = Events.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");
@@ -187,5 +241,10 @@ public class AddTaskActivity extends AppCompatActivity {
         int delta = day_of_week - Calendar.MONDAY;
         if (delta < 0) delta += 7;
         c.add(Calendar.DAY_OF_WEEK, -delta);
+    }
+
+    private class Event {
+        long _ID;
+        String TITLE;
     }
 }

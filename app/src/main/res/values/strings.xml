@@ -21,4 +21,5 @@
     <string name="edit_task_title_hint">write assignments…</string>
     <string name="weekly">For a week</string>
     <string name="select_week">Select week</string>
+    <string name="linked_to_event">Linked to event</string>
 </resources>

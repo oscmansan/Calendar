@@ -44,6 +44,29 @@
         android:gravity="start"
         android:inputType="textCapSentences|textMultiLine"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/linked_to_event"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"/>
+
+        <Spinner
+            android:id="@+id/linked_event_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"/>
+
+    </LinearLayout>
+
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
