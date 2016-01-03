@@ -22,4 +22,6 @@
     <string name="weekly">For a week</string>
     <string name="select_week">Select week</string>
     <string name="linked_to_event">Linked to event</string>
+    <string name="title_activity_pending_tasks">Pending tasks</string>
+    <string name="pending_tasks">Pending tasks</string>
 </resources>

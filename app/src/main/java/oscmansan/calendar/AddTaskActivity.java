@@ -20,19 +20,13 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class AddTaskActivity extends AppCompatActivity {
@@ -48,6 +42,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private long calID;
     private ArrayList<Event> events;
     private long eventID = -1;
+    private String eventTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +90,7 @@ public class AddTaskActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position > 0) {
                     eventID = events.get(position-1)._ID;
-                    Log.d(LOG_TAG, "eventID: " + eventID);
+                    eventTitle = events.get(position-1).TITLE;
                 }
             }
 
@@ -208,6 +203,7 @@ public class AddTaskActivity extends AppCompatActivity {
             date.set(Calendar.HOUR_OF_DAY, 0);
             date.set(Calendar.MINUTE, 0);
             date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
             rollToMonday(date);
 
             values.put(Events.DTSTART, date.getTimeInMillis());
@@ -222,7 +218,7 @@ public class AddTaskActivity extends AppCompatActivity {
         values.put(Events.STATUS, Events.STATUS_TENTATIVE);
         values.put(Events.SYNC_DATA1, "task");
         if (eventID >= 0)
-            values.put(Events.SYNC_DATA3, eventID);
+            values.put(Events.SYNC_DATA3, eventTitle);
 
         Uri.Builder builder = Events.CONTENT_URI.buildUpon();
         builder.appendQueryParameter(Events.ACCOUNT_NAME,"some.account@googlemail.com");

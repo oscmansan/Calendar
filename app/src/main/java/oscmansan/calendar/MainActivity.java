@@ -87,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("calID", calID);
                 startActivity(intent);
                 return true;
+            case R.id.pending_tasks:
+                intent = new Intent(this,PendingTasksActivity.class);
+                intent.putExtra("calID", calID);
+                startActivity(intent);
+                return true;
             case R.id.delete_all_events:
                 deleteAllEvents();
                 showWeek(c);
