@@ -17,7 +17,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -32,10 +31,9 @@ public class AddEventActivity extends AppCompatActivity {
 
     private EditText edit_event_title;
     private Calendar beginDate;
-    private TextView edit_begin_date;
+    private TextView edit_date;
     private TextView edit_begin_time;
     private Calendar endDate;
-    private TextView edit_end_date;
     private TextView edit_end_time;
     private EditText edit_event_description;
     private Button save_button;
@@ -62,12 +60,12 @@ public class AddEventActivity extends AppCompatActivity {
 
         beginDate = Calendar.getInstance();
         beginDate.add(Calendar.HOUR_OF_DAY, 1);
-        beginDate.set(Calendar.MINUTE,0);
+        beginDate.set(Calendar.MINUTE, 0);
 
-        edit_begin_date = (TextView)findViewById(R.id.edit_begin_date);
+        edit_date = (TextView)findViewById(R.id.edit_date);
         SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
-        edit_begin_date.setText(df.format(beginDate.getTime()));
-        edit_begin_date.setOnClickListener(new View.OnClickListener() {
+        edit_date.setText(df.format(beginDate.getTime()));
+        edit_date.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int year = beginDate.get(Calendar.YEAR);
@@ -94,19 +92,6 @@ public class AddEventActivity extends AppCompatActivity {
         endDate = Calendar.getInstance();
         endDate.add(Calendar.HOUR_OF_DAY, 2);
         endDate.set(Calendar.MINUTE, 0);
-
-        edit_end_date = (TextView)findViewById(R.id.edit_end_date);
-        edit_end_date.setText(df.format(endDate.getTime()));
-        edit_end_date.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int year = endDate.get(Calendar.YEAR);
-                int month = endDate.get(Calendar.MONTH);
-                int day_of_month = endDate.get(Calendar.DAY_OF_MONTH);
-                DatePickerDialog datePicker = new DatePickerDialog(AddEventActivity.this, endDateSetListener, year, month, day_of_month);
-                datePicker.show();
-            }
-        });
 
         edit_end_time = (TextView)findViewById(R.id.edit_end_time);
         edit_end_time.setText(String.format("%02d", endDate.get(Calendar.HOUR_OF_DAY)) + ":" +
@@ -170,19 +155,8 @@ public class AddEventActivity extends AppCompatActivity {
             SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
 
             beginDate.set(year, monthOfYear, dayOfMonth);
-            edit_begin_date.setText(df.format(beginDate.getTime()));
-
+            edit_date.setText(df.format(beginDate.getTime()));
             endDate.set(year, monthOfYear, dayOfMonth);
-            edit_end_date.setText(df.format(endDate.getTime()));
-        }
-    };
-
-    private DatePickerDialog.OnDateSetListener endDateSetListener = new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            endDate.set(year, monthOfYear, dayOfMonth);
-            SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
-            edit_end_date.setText(df.format(endDate.getTime()));
         }
     };
 
@@ -205,13 +179,25 @@ public class AddEventActivity extends AppCompatActivity {
         @Override
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
             endDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            endDate.set(Calendar.MINUTE,minute);
+            endDate.set(Calendar.MINUTE, minute);
             edit_end_time.setText(String.format("%02d", endDate.get(Calendar.HOUR_OF_DAY)) + ":" +
                     String.format("%02d", endDate.get(Calendar.MINUTE)));
+
+            if (beginDate.getTimeInMillis() > endDate.getTimeInMillis()) {
+                beginDate.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                beginDate.set(Calendar.MINUTE, minute);
+                edit_begin_time.setText(String.format("%02d", beginDate.get(Calendar.HOUR_OF_DAY)) + ":" +
+                        String.format("%02d", beginDate.get(Calendar.MINUTE)));
+            }
         }
     };
 
     private void insertEvent() {
+        if (edit_event_title.getText().toString().equals("")) {
+            Toast.makeText(this,"Error: title cannot be blank",Toast.LENGTH_LONG).show();
+            return;
+        }
+
         long startMillis = beginDate.getTimeInMillis();
         long endMillis = endDate.getTimeInMillis();
 

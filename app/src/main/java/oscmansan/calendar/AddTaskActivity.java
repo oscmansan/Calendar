@@ -191,6 +191,11 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void insertTask() {
+        if (edit_task_title.getText().toString().equals("")) {
+            Toast.makeText(this,"Error: title cannot be blank",Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Boolean daily = daily_radio.isChecked();
 
         ContentValues values = new ContentValues();

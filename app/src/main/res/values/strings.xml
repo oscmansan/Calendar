@@ -24,4 +24,7 @@
     <string name="linked_to_event">Linked to event</string>
     <string name="title_activity_pending_tasks">Pending tasks</string>
     <string name="pending_tasks">Pending tasks</string>
+    <string name="start_time_label">Start time</string>
+    <string name="end_time_label">End time</string>
+    <string name="date_label">Date</string>
 </resources>

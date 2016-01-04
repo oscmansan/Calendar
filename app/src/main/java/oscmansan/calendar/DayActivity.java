@@ -17,10 +17,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -116,16 +113,8 @@ public class DayActivity extends AppCompatActivity {
                 ((TextView) dialog_layout.findViewById(R.id.event_detail_title)).setText(title);
                 SimpleDateFormat df = new SimpleDateFormat("EEEE, d MMMM yyyy", Locale.US);
 
-                TextView event_detail_date = (TextView) dialog_layout.findViewById(R.id.event_detail_date);
-                TextView event_detail_time = (TextView) dialog_layout.findViewById(R.id.event_detail_time);
-                if (sameDay(beginTime,endTime)) {
-                    event_detail_date.setText(df.format(beginTime.getTime()));
-                    event_detail_time.setText(time);
-                }
-                else {
-                    event_detail_date.setText(df.format(beginTime.getTime()) + " -");
-                    event_detail_time.setText(df.format(endTime.getTime()));
-                }
+                ((TextView) dialog_layout.findViewById(R.id.event_detail_date)).setText(df.format(beginTime.getTime()));
+                ((TextView) dialog_layout.findViewById(R.id.event_detail_time)).setText(time);
 
                 TextView event_detail_description = (TextView) dialog_layout.findViewById(R.id.event_detail_description);
                 if (!description.equals(""))
@@ -251,19 +240,15 @@ public class DayActivity extends AppCompatActivity {
         weekEnd.add(Calendar.DAY_OF_WEEK, 6);
 
         String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS, Events.SYNC_DATA2};
-        String selection = "(" + Events.CALENDAR_ID + " = ? AND (("
-                + Events.DTSTART + " >= ? AND "
-                + Events.DTSTART + " <= ? ) OR ("
-                + Events.DTEND + " >= ? AND "
-                + Events.DTEND + " <= ? )) OR "
-                + Events.SYNC_DATA2 + " = ? OR ("
-                + Events.SYNC_DATA2 + " = ? AND "
-                + Events.DTSTART + " >= ? AND "
-                + Events.DTSTART + " <= ?))";
+        String selection = "("  + Events.CALENDAR_ID + " = ? AND ("
+                                + Events.DTSTART + " >= ? AND "
+                                + Events.DTSTART + " <= ? ) OR "
+                                + Events.SYNC_DATA2 + " = ? OR ("
+                                + Events.SYNC_DATA2 + " = ? AND "
+                                + Events.DTSTART + " >= ? AND "
+                                + Events.DTSTART + " <= ?))";
         String[] selectionArgs = {
                 String.valueOf(calID),
-                String.valueOf(dayStart.getTimeInMillis()),
-                String.valueOf(dayEnd.getTimeInMillis()),
                 String.valueOf(dayStart.getTimeInMillis()),
                 String.valueOf(dayEnd.getTimeInMillis()),
                 "daily",
@@ -273,12 +258,6 @@ public class DayActivity extends AppCompatActivity {
         };
 
         return getContentResolver().query(Events.CONTENT_URI,projection,selection,selectionArgs, Events.DTSTART + " ASC");
-    }
-
-    private boolean sameDay(Calendar d1, Calendar d2) {
-        return d1.get(Calendar.DAY_OF_MONTH) == d2.get(Calendar.DAY_OF_MONTH) &&
-                d1.get(Calendar.MONTH) == d2.get(Calendar.MONTH) &&
-                d1.get(Calendar.YEAR) == d2.get(Calendar.YEAR);
     }
 
     private void rollToMonday(Calendar c) {
