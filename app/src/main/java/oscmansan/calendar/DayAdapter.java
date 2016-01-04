@@ -1,5 +1,6 @@
 package oscmansan.calendar;
 
+import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -127,15 +128,19 @@ public class DayAdapter extends ArrayAdapter<Calendar> implements AdapterView.On
         weekEnd.add(Calendar.DAY_OF_WEEK, 6);
 
         String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS};
-        String selection = "((" + Events.CALENDAR_ID + " = ? AND "
+        String selection = "(" + Events.CALENDAR_ID + " = ? AND (("
                                 + Events.DTSTART + " >= ? AND "
-                                + Events.DTSTART + " <= ? ) OR "
+                                + Events.DTSTART + " <= ? ) OR ("
+                                + Events.DTEND + " >= ? AND "
+                                + Events.DTEND + " <= ? )) OR "
                                 + Events.SYNC_DATA2 + " = ? OR ("
                                 + Events.SYNC_DATA2 + " = ? AND "
                                 + Events.DTSTART + " >= ? AND "
                                 + Events.DTSTART + " <= ?))";
         String[] selectionArgs = {
                 String.valueOf(calID),
+                String.valueOf(dayStart.getTimeInMillis()),
+                String.valueOf(dayEnd.getTimeInMillis()),
                 String.valueOf(dayStart.getTimeInMillis()),
                 String.valueOf(dayEnd.getTimeInMillis()),
                 "daily",
