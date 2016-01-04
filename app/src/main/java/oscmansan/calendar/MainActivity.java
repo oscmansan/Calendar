@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -93,8 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             case R.id.delete_all_events:
-                deleteAllEvents();
-                showWeek(c);
+                showDeleteAllEventsDialog();
                 return true;
             case R.id.help:
                 showHelpDialog();
@@ -196,6 +196,25 @@ public class MainActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Rows deleted: " + rows);
     }
 
+    private void showDeleteAllEventsDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Are you sure you want to delete all events?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteAllEvents();
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        builder.create().show();
+    }
+
     private void deleteAllEvents() {
         String[] projection = {CalendarContract.Events._ID};
         String selection = "(" + CalendarContract.Events.CALENDAR_ID + " = ?)";
@@ -207,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
             deleteEvent(eventID);
         }
         cur.close();
+
+        showWeek(c);
     }
 
     private void showHelpDialog() {
