@@ -30,9 +30,14 @@
         android:orderInCategory="50"
         app:showAsAction="never" />
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
+    <item android:id="@+id/help"
+        android:title="@string/help"
+        android:orderInCategory="60"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/about"
+        android:title="@string/about"
+        android:orderInCategory="70"
         app:showAsAction="never" />
 
 </menu>

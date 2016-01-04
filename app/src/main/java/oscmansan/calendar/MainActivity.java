@@ -1,5 +1,6 @@
 package oscmansan.calendar;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -72,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent;
 
         switch (id) {
-            case R.id.action_settings:
-                return true;
             case R.id.pick_date:
                 pickDate();
                 return true;
@@ -95,6 +95,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.delete_all_events:
                 deleteAllEvents();
                 showWeek(c);
+                return true;
+            case R.id.help:
+                showHelpDialog();
+                return true;
+            case R.id.about:
+                showAboutDialog();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -201,6 +207,20 @@ public class MainActivity extends AppCompatActivity {
             deleteEvent(eventID);
         }
         cur.close();
+    }
+
+    private void showHelpDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialog_layout = getLayoutInflater().inflate(R.layout.help,null);
+        builder.setView(dialog_layout);
+        builder.create().show();
+    }
+
+    private void showAboutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialog_layout = getLayoutInflater().inflate(R.layout.about,null);
+        builder.setView(dialog_layout);
+        builder.create().show();
     }
 
 }

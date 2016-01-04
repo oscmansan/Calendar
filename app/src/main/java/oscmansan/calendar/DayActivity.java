@@ -201,7 +201,7 @@ public class DayActivity extends AppCompatActivity {
                 if (status == Events.STATUS_TENTATIVE)
                     items = new String[]{"Delete task", "Mark as done"};
                 else
-                    items = new String[]{"Delete task"};
+                    items = new String[]{"Delete task", "Mark as pending"};
                 builder.setItems(items, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -210,7 +210,10 @@ public class DayActivity extends AppCompatActivity {
                                 deleteEvent(eventID);
                                 break;
                             case 1:
-                                markAsDone(eventID);
+                                if (status == Events.STATUS_TENTATIVE)
+                                    markAsDone(eventID);
+                                else
+                                    markAsPending(eventID);
                                 break;
                         }
                         setEvents();
@@ -286,6 +289,14 @@ public class DayActivity extends AppCompatActivity {
         Uri updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
         ContentValues values = new ContentValues();
         values.put(Events.STATUS, Events.STATUS_CONFIRMED);
+        int rows = getContentResolver().update(updateUri, values, null, null);
+        Log.i(LOG_TAG, "Rows updated: " + rows);
+    }
+
+    private void markAsPending(long eventID) {
+        Uri updateUri = ContentUris.withAppendedId(Events.CONTENT_URI, eventID);
+        ContentValues values = new ContentValues();
+        values.put(Events.STATUS, Events.STATUS_TENTATIVE);
         int rows = getContentResolver().update(updateUri, values, null, null);
         Log.i(LOG_TAG, "Rows updated: " + rows);
     }
