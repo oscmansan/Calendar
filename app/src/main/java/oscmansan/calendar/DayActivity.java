@@ -166,6 +166,8 @@ public class DayActivity extends AppCompatActivity {
         else
             frequency = "For a week";
 
+        final String linked_event = cursor.getString(8);
+
         task.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,6 +181,12 @@ public class DayActivity extends AppCompatActivity {
                     task_detail_description.setText(description);
                 else
                     task_detail_description.setText("No description");
+
+                TextView task_detail_linked_event = (TextView)dialog_layout.findViewById(R.id.task_detail_linked_event);
+                if (linked_event != null)
+                    task_detail_linked_event.setText(linked_event);
+                else
+                    task_detail_linked_event.setText("No event linked");
 
                 builder.setView(dialog_layout);
                 builder.create().show();
@@ -239,7 +247,8 @@ public class DayActivity extends AppCompatActivity {
         weekEnd.set(Calendar.SECOND, 59);
         weekEnd.add(Calendar.DAY_OF_WEEK, 6);
 
-        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.SYNC_DATA1, Events.STATUS, Events.SYNC_DATA2};
+        String[] projection = {Events._ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART,
+                Events.DTEND, Events.SYNC_DATA1, Events.STATUS, Events.SYNC_DATA2, Events.SYNC_DATA3};
         String selection = "("  + Events.CALENDAR_ID + " = ? AND ("
                                 + Events.DTSTART + " >= ? AND "
                                 + Events.DTSTART + " <= ? ) OR "
