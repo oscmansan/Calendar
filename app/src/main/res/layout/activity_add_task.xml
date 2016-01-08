@@ -1,110 +1,117 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="oscmansan.calendar.AddTaskActivity"
-    android:gravity="center_horizontal">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="oscmansan.calendar.AddTaskActivity"
+        android:gravity="center_horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/edit_task_title_label"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"/>
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_task_title_label"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"/>
+
+            <EditText
+                android:id="@+id/edit_task_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:inputType="text|textCapSentences"
+                android:hint="@string/edit_task_title_hint"
+                android:textSize="18sp"/>
+
+        </LinearLayout>
 
         <EditText
-            android:id="@+id/edit_task_title"
-            android:layout_width="0dp"
+            android:id="@+id/edit_task_description"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:minLines="3"
+            android:hint="@string/add_description"
+            android:gravity="start"
+            android:inputType="textCapSentences|textMultiLine"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
             android:layout_marginStart="10dp"
-            android:inputType="text|textCapSentences"
-            android:hint="@string/edit_task_title_hint"
-            android:textSize="18sp"/>
+            android:layout_marginEnd="10dp">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/linked_to_event"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"/>
 
-    <EditText
-        android:id="@+id/edit_task_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:minLines="3"
-        android:hint="@string/add_description"
-        android:gravity="start"
-        android:inputType="textCapSentences|textMultiLine"/>
+            <Spinner
+                android:id="@+id/linked_event_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp">
+        </LinearLayout>
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="start">
+
+            <RadioButton
+                android:id="@+id/daily_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/daily" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/weekly"
+                android:layout_marginStart="20dp"/>
+
+        </RadioGroup>
 
         <TextView
+            android:id="@+id/select_week"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/linked_to_event"
-            android:textSize="18sp"
-            android:textColor="@android:color/black"/>
+            android:layout_gravity="start"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"/>
 
-        <Spinner
-            android:id="@+id/linked_event_spinner"
+        <Button
+            android:id="@+id/save_button"
+            android:text="@string/save"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"/>
+            android:layout_marginTop="20dp"
+            android:gravity="center"/>
 
     </LinearLayout>
 
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:layout_gravity="start">
-
-        <RadioButton
-            android:id="@+id/daily_radio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/daily" />
-
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/weekly"
-            android:layout_marginStart="20dp"/>
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/select_week"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
-        android:visibility="gone"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"/>
-
-    <Button
-        android:id="@+id/save_button"
-        android:text="@string/save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:gravity="center"/>
-
-</LinearLayout>
+</ScrollView>

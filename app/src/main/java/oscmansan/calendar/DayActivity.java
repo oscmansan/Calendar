@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -135,6 +136,7 @@ public class DayActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deleteEvent(eventID);
+                        Toast.makeText(DayActivity.this, "Event deleted",Toast.LENGTH_LONG).show();
                         setEvents();
                     }
                 });
@@ -208,6 +210,7 @@ public class DayActivity extends AppCompatActivity {
                         switch (which) {
                             case 0:
                                 deleteEvent(eventID);
+                                Toast.makeText(DayActivity.this, "Task deleted",Toast.LENGTH_LONG).show();
                                 break;
                             case 1:
                                 if (status == Events.STATUS_TENTATIVE)
