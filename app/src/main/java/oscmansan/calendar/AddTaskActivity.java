@@ -233,7 +233,8 @@ public class AddTaskActivity extends AppCompatActivity {
         Uri uri = getContentResolver().insert(builder.build(), values);
         // get the event ID that is the last element in the Uri
         long eventID = Long.parseLong(uri.getLastPathSegment());
-        Toast.makeText(this, "Task added: " + eventID, Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "Task added: " + eventID);
+        Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show();
         finish();
     }
 
